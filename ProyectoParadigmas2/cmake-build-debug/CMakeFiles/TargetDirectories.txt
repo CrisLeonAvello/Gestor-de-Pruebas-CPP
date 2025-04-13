@@ -1,0 +1,3 @@
+C:/Users/cristian/CLionProjects/ProyectoParadigmas2/cmake-build-debug/CMakeFiles/ProyectoParadigmas2.dir
+C:/Users/cristian/CLionProjects/ProyectoParadigmas2/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/cristian/CLionProjects/ProyectoParadigmas2/cmake-build-debug/CMakeFiles/rebuild_cache.dir
