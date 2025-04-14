@@ -6,14 +6,14 @@
 
 using namespace std;
 
-// Función que elimina tildes de texto
+// Funcion que elimina tildes de texto
 string eliminarTildes(string texto) {
     for (size_t i = 0; i < texto.length(); i++) {
-        if (texto[i] == 'á' || texto[i] == 'Á') texto[i] = 'a';
-        else if (texto[i] == 'é' || texto[i] == 'É') texto[i] = 'e';
-        else if (texto[i] == 'í' || texto[i] == 'Í') texto[i] = 'i';
-        else if (texto[i] == 'ó' || texto[i] == 'Ó') texto[i] = 'o';
-        else if (texto[i] == 'ú' || texto[i] == 'Ú') texto[i] = 'u';
+        if (texto[i] == 'a' || texto[i] == 'A') texto[i] = 'a';
+        else if (texto[i] == 'e' || texto[i] == 'E') texto[i] = 'e';
+        else if (texto[i] == 'i' || texto[i] == 'I') texto[i] = 'i';
+        else if (texto[i] == 'o' || texto[i] == 'O') texto[i] = 'o';
+        else if (texto[i] == 'u' || texto[i] == 'U') texto[i] = 'u';
     }
     return texto;
 }
@@ -26,7 +26,6 @@ public:
     Respuesta(string texto) : texto(eliminarTildes(move(texto))) {}
     string getTexto() const { return texto; }
 
-    // Destructor
     ~Respuesta() {}
 };
 
@@ -34,14 +33,16 @@ class ItemPregunta {
 private:
     string enunciado;
     vector<Respuesta> respuestas;
+    float duracion; // Duracion de la pregunta en minutos
 
 public:
-    ItemPregunta(string enunciado) : enunciado(eliminarTildes(move(enunciado))) {}
+    ItemPregunta(string enunciado, float duracion = 0)
+        : enunciado(eliminarTildes(move(enunciado))), duracion(duracion) {}
 
     void agregarRespuesta(const string& texto) { respuestas.emplace_back(eliminarTildes(texto)); }
 
     void mostrar() const {
-        cout << "Pregunta: " << enunciado << endl;
+        cout << "Pregunta: " << enunciado << " (Duracion: " << duracion << " minutos)" << endl;
         for (size_t i = 0; i < respuestas.size(); ++i) {
             cout << "  - Respuesta " << i + 1 << ": " << respuestas[i].getTexto() << endl;
         }
@@ -50,8 +51,9 @@ public:
     string getEnunciado() const { return enunciado; }
     vector<Respuesta>& getRespuestas() { return respuestas; }
     void setEnunciado(const string& nuevoEnunciado) { enunciado = eliminarTildes(nuevoEnunciado); }
+    float getDuracion() const { return duracion; }
+    void setDuracion(float nuevaDuracion) { duracion = nuevaDuracion; }
 
-    // Destructor
     ~ItemPregunta() {
         respuestas.clear(); // Limpia todas las respuestas almacenadas
     }
@@ -86,13 +88,13 @@ public:
 
     string getTaxonomia() const { return taxonomia; }
     string getTipo() const { return tipo; }
-    vector<ItemPregunta>& getPreguntas() { return preguntas; }
+    const vector<ItemPregunta>& getPreguntas() const { return preguntas; } // Este método es ahora constante
 
-    // Destructor
     ~Item() {
         preguntas.clear(); // Limpia las preguntas del item al destruirlo
     }
 };
+
 
 class Profesor {
 private:
@@ -103,7 +105,6 @@ public:
 
     string getNombre() const { return nombre; }
 
-    // Destructor
     ~Profesor() {}
 };
 
@@ -120,7 +121,6 @@ public:
     float getPonderacion() const { return ponderacion; }
     void setPonderacion(float nuevaPonderacion) { ponderacion = nuevaPonderacion; }
 
-    // Destructor
     ~Materia() {}
 };
 
@@ -152,20 +152,31 @@ public:
     vector<Item>& getEditableItems() { return items; }
     const string& getTitulo() const { return titulo; }
 
+    float calcularDuracionTotal() const {
+        float duracionTotal = 0;
+        for (const auto& item : items) {
+            for (const auto& pregunta : item.getPreguntas()) {
+                duracionTotal += pregunta.getDuracion();
+            }
+        }
+        return duracionTotal;
+    }
+
     void mostrarPrueba() const {
-        cout << "Título: " << titulo << endl;
+        cout << "Titulo: " << titulo << endl;
         cout << "Fecha: " << fechaCreacion << endl;
         cout << "Profesor: " << profesor.getNombre() << endl;
         cout << "Materia: " << materia.getNombre() << endl;
-        cout << "Ponderación: " << materia.getPonderacion() << endl;
+        cout << "Ponderacion: " << materia.getPonderacion() << endl;
 
         for (size_t i = 0; i < items.size(); ++i) {
             cout << "\nItem #" << i + 1 << ":" << endl;
             items[i].mostrar(i + 1);
         }
+
+        cout << "\nDuracion total de la prueba: " << calcularDuracionTotal() << " minutos" << endl;
     }
 
-    // Destructor
     ~Prueba() {
         items.clear(); // Limpia los items al liberar la prueba
     }
@@ -182,7 +193,7 @@ private:
             if (cin.fail() || opcion < min || opcion > max) {
                 cin.clear();
                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                cout << "Ingrese un número válido: ";
+                cout << "Ingrese un numero valido: ";
             } else {
                 return opcion;
             }
@@ -190,21 +201,21 @@ private:
     }
 
     void pausaMenu() const {
-        cout << "\nPresione ENTER para regresar al menú principal...";
+        cout << "\nPresione ENTER para regresar al menu principal...";
         cin.ignore();
         cin.get();
     }
 
 public:
     void mostrarMenu() const {
-        cout << "\n===== Menú Principal =====\n";
-        cout << "1. Crear Evaluación.\n";
+        cout << "\n===== Menu Principal =====\n";
+        cout << "1. Crear Evaluacion.\n";
         cout << "2. Actualizar Item.\n";
         cout << "3. Borrar Items.\n";
-        cout << "4. Información de los Items.\n";
-        cout << "5. Buscar según Taxonomía.\n";
+        cout << "4. Informacion de los Items.\n";
+        cout << "5. Buscar segun Taxonomia.\n";
         cout << "6. Salir\n";
-        cout << "Seleccione una opción: ";
+        cout << "Seleccione una opcion: ";
     }
 
     void lanzar() {
@@ -218,7 +229,7 @@ public:
                 case 3: borrarItem(); break;
                 case 4: mostrarPruebas(); break;
                 case 5: consultarItemsPorTaxonomia(); break;
-                case 6: cout << "Saliendo... ¡Adiós!\n"; break;
+                case 6: cout << "Saliendo... Adios!\n"; break;
             }
         } while (opcion != 6);
     }
@@ -226,7 +237,7 @@ public:
     void crearPrueba() {
         string tituloPrueba;
         cout << "\n===== Crear Prueba =====\n";
-        cout << "Ingrese el título de la prueba: ";
+        cout << "Ingrese el titulo de la prueba: ";
         cin.ignore();
         getline(cin, tituloPrueba);
 
@@ -239,7 +250,7 @@ public:
         string nombreMateria;
         getline(cin, nombreMateria);
 
-        cout << "Ingrese la ponderación de la materia: ";
+        cout << "Ingrese la ponderacion de la materia: ";
         float ponderacion;
         cin >> ponderacion;
 
@@ -248,22 +259,22 @@ public:
 
         while (true) {
             cout << "\n=== Nuevo Item ===\n";
-            cout << "Seleccione qué Tipo de Pregunta desea en el Item.\n";
+            cout << "Seleccione que Tipo de Pregunta desea en el Item.\n";
             cout << "1) Verdadero/Falso\n";
-            cout << "2) Opción Múltiple\n------------\n";
+            cout << "2) Opcion Multiple\n------------\n";
             cout << "3) Salir\n";
 
             int tipoItem = obtenerEntradaValida(1, 3);
 
             if (tipoItem == 3) {
                 pruebas.push_back(nuevaPrueba);
-                cout << "Saliendo de la creación de la prueba...\n";
+                cout << "Saliendo de la creacion de la prueba...\n";
                 return;
             }
 
-            string tipo = (tipoItem == 1) ? "Verdadero/Falso" : "Opción Múltiple";
+            string tipo = (tipoItem == 1) ? "Verdadero/Falso" : "Opcion Multiple";
 
-            cout << "Ingrese la Taxonomía del item.\n";
+            cout << "Ingrese la Taxonomia del item.\n";
             cout << "1) Crear\n2) Evaluar\n3) Analizar\n4) Aplicar\n5) Entender\n6) Recordar\n------------\n";
             int taxonomiaItem = obtenerEntradaValida(1, 6);
             string taxonomia;
@@ -287,10 +298,12 @@ public:
                 string enunciadoPregunta;
                 getline(cin, enunciadoPregunta);
 
-                ItemPregunta nuevaPregunta(enunciadoPregunta);
+                cout << "Ingrese la duracion de esta pregunta (en minutos): ";
+                float duracionPregunta = obtenerEntradaValida(1, 120); // Duracion maxima de 120 minutos
+                ItemPregunta nuevaPregunta(enunciadoPregunta, duracionPregunta);
 
-                if (tipo == "Opción Múltiple") {
-                    cout << "¿Cuántas Respuestas quiere ingresar?: ";
+                if (tipo == "Opcion Multiple") {
+                    cout << "Cuantas Respuestas quiere ingresar?: ";
                     int numRespuestas = obtenerEntradaValida(1, 4);
 
                     for (int r = 0; r < numRespuestas; ++r) {
@@ -310,7 +323,7 @@ public:
 
             nuevaPrueba.agregarItem(nuevoItem);
 
-            cout << "¿Desea agregar otro item?\n1) Sí\n2) No\n";
+            cout << "Desea agregar otro item?\n1) Si\n2) No\n";
             int continuar = obtenerEntradaValida(1, 2);
             if (continuar == 2) {
                 pruebas.push_back(nuevaPrueba);
@@ -322,7 +335,7 @@ public:
 
     void mostrarPruebas() const {
         if (pruebas.empty()) {
-            cout << "No se han creado pruebas aún.\n";
+            cout << "No se han creado pruebas aun.\n";
         } else {
             for (size_t i = 0; i < pruebas.size(); ++i) {
                 cout << "\nPrueba #" << i + 1 << ":\n";
@@ -334,13 +347,13 @@ public:
 
     void consultarItemsPorTaxonomia() const {
         if (pruebas.empty()) {
-            cout << "No se han creado pruebas aún.\n";
+            cout << "No se han creado pruebas aun.\n";
         } else {
             for (size_t i = 0; i < pruebas.size(); ++i) {
-                cout << "\nTítulo de la prueba: " << pruebas[i].getTitulo() << endl;
+                cout << "\nTitulo de la prueba: " << pruebas[i].getTitulo() << endl;
                 const auto& items = pruebas[i].getItems();
                 for (size_t j = 0; j < items.size(); ++j) {
-                    cout << "  Item #" << j + 1 << " - Taxonomía: " << items[j].getTaxonomia() << endl;
+                    cout << "  Item #" << j + 1 << " - Taxonomia: " << items[j].getTaxonomia() << endl;
                 }
             }
         }
@@ -349,7 +362,7 @@ public:
 
     void borrarItem() {
         if (pruebas.empty()) {
-            cout << "No se han creado pruebas aún.\n";
+            cout << "No se han creado pruebas aun.\n";
             return;
         }
 
@@ -370,12 +383,12 @@ public:
 
             cout << "Prueba seleccionada: " << pruebaSeleccionada.getTitulo() << "\nItems disponibles:\n";
             for (size_t i = 0; i < items.size(); ++i) {
-                cout << "  Item #" << i + 1 << " - Taxonomía: " << items[i].getTaxonomia() << endl;
+                cout << "  Item #" << i + 1 << " - Taxonomia: " << items[i].getTaxonomia() << endl;
             }
 
-            cout << "Ingrese el número del item que desea borrar: ";
+            cout << "Ingrese el numero del item que desea borrar: ";
             int numeroItem = obtenerEntradaValida(1, items.size());
-            cout << "¿Está seguro que quiere eliminar este item?\n1) Sí\n2) No\n";
+            cout << "Esta seguro que quiere eliminar este item?\n1) Si\n2) No\n";
             int confirmacion = obtenerEntradaValida(1, 2);
 
             if (confirmacion == 1) {
@@ -383,19 +396,19 @@ public:
                 cout << "Item eliminado exitosamente.\n";
 
                 if (items.empty()) {
-                    cout << "La prueba \"" << pruebaSeleccionada.getTitulo() << "\" ya no tiene items. Se eliminará automáticamente.\n";
+                    cout << "La prueba \"" << pruebaSeleccionada.getTitulo() << "\" ya no tiene items. Se eliminara automaticamente.\n";
                     pruebas.erase(pruebas.begin() + indicePrueba);
                     break;
                 }
             } else {
-                cout << "Acción cancelada. El item no se eliminó.\n";
+                cout << "Accion cancelada. El item no se elimino.\n";
                 continue;
             }
 
-            cout << "¿Desea hacer algo más?\n";
+            cout << "Desea hacer algo mas?\n";
             cout << "1) Borrar otro item\n";
             cout << "2) Seleccionar otra prueba\n";
-            cout << "3) Regresar al menú principal\n";
+            cout << "3) Regresar al menu principal\n";
             int opcion = obtenerEntradaValida(1, 3);
 
             if (opcion == 1) continue;
@@ -407,7 +420,7 @@ public:
 
     void actualizarItem() {
         if (pruebas.empty()) {
-            cout << "No se han creado pruebas aún.\n";
+            cout << "No se han creado pruebas aun.\n";
             return;
         }
 
@@ -434,7 +447,7 @@ public:
         int indiceItem = obtenerEntradaValida(1, items.size()) - 1;
         auto& itemSeleccionado = items[indiceItem];
 
-        cout << "\nSeleccione una acción:\n";
+        cout << "\nSeleccione una accion:\n";
         cout << "1) Agregar Pregunta\n";
         cout << "2) Salir\n";
         int accion = obtenerEntradaValida(1, 2);
@@ -446,14 +459,17 @@ public:
                 string preguntaTexto;
                 getline(cin, preguntaTexto);
 
-                ItemPregunta nuevaPregunta(preguntaTexto);
+                cout << "Ingrese la duracion de esta pregunta (en minutos): ";
+                float duracionPregunta = obtenerEntradaValida(1, 60);
+
+                ItemPregunta nuevaPregunta(preguntaTexto, duracionPregunta);
 
                 if (itemSeleccionado.getTipo() == "Verdadero/Falso") {
                     nuevaPregunta.agregarRespuesta("Verdadero");
                     nuevaPregunta.agregarRespuesta("Falso");
-                    cout << "Respuestas 'Verdadero' y 'Falso' añadidas automáticamente.\n";
-                } else if (itemSeleccionado.getTipo() == "Opción Múltiple") {
-                    cout << "¿Cuántas respuestas desea agregar?: ";
+                    cout << "Respuestas 'Verdadero' y 'Falso' añadidas automaticamente.\n";
+                } else if (itemSeleccionado.getTipo() == "Opcion Multiple") {
+                    cout << "Cuantas respuestas desea agregar?: ";
                     int numRespuestas = obtenerEntradaValida(1, 10);
 
                     for (int i = 0; i < numRespuestas; ++i) {
@@ -473,13 +489,12 @@ public:
                 break;
             }
             case 2:
-                cout << "Saliendo de la actualización...\n";
+                cout << "Saliendo de la actualizacion...\n";
                 return;
         }
         pausaMenu();
     }
 
-    // Destructor
     ~Menu() {
         pruebas.clear(); // Libera la memoria asociada a las pruebas
     }
