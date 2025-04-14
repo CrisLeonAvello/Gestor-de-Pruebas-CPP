@@ -119,104 +119,84 @@ private:
         cin.get();
     }
 
-    void actualizarItem() {
-        if (pruebas.empty()) {
-            cout << "No se han creado pruebas aun.\n";
-            return;
-        }
-
-        cout << "Seleccione la prueba donde desea actualizar un item:\n";
-        for (size_t i = 0; i < pruebas.size(); ++i) {
-            cout << i + 1 << ") " << pruebas[i].getTitulo() << endl;
-        }
-
-        int indicePrueba = obtenerEntradaValida(1, pruebas.size()) - 1;
-        auto& pruebaSeleccionada = pruebas[indicePrueba];
-
-        const auto& items = pruebaSeleccionada.getItems();
-        if (items.empty()) {
-            cout << "La prueba seleccionada no tiene items.\n";
-            pausaMenu();
-            return;
-        }
-
-        cout << "Seleccione el item que desea actualizar:\n";
-        for (size_t i = 0; i < items.size(); ++i) {
-            cout << i + 1 << ") Item #" << i + 1 << " - Taxonomia: " << items[i].getTaxonomia() << endl;
-        }
-
-        int indiceItem = obtenerEntradaValida(1, items.size()) - 1;
-        auto& itemSeleccionado = pruebaSeleccionada.getEditableItems()[indiceItem];
-
-        cout << "\nSeleccione una accion:\n";
-        cout << "1) Agregar Pregunta\n";
-        cout << "2) Eliminar Preguntas\n";
-        cout << "3) Seleccionar y Modificar pregunta (Solo Opcion Multiple)\n";
-        int accion = obtenerEntradaValida(1, 3);
-
-        switch (accion) {
-            case 1: { // Agregar pregunta
-                cout << "Ingrese el enunciado de la nueva pregunta: ";
-                cin.ignore();
-                string preguntaTexto;
-                getline(cin, preguntaTexto);
-                ItemPregunta nuevaPregunta(preguntaTexto);
-                itemSeleccionado.agregarPregunta(nuevaPregunta);
-                cout << "Pregunta agregada exitosamente.\n";
-                break;
-            }
-            case 2: { // Eliminar pregunta
-                auto& preguntas = itemSeleccionado.getPreguntas();
-                if (preguntas.empty()) {
-                    cout << "El item no tiene preguntas.\n";
-                } else {
-                    cout << "Seleccione la pregunta a eliminar:\n";
-                    for (size_t i = 0; i < preguntas.size(); ++i) {
-                        cout << i + 1 << ") " << preguntas[i].getEnunciado() << endl;
-                    }
-                    int indicePregunta = obtenerEntradaValida(1, preguntas.size()) - 1;
-                    itemSeleccionado.eliminarPregunta(indicePregunta);
-                }
-                break;
-            }
-            case 3: { // Modificar pregunta (solo para Opcion Multiple)
-                if (itemSeleccionado.getTipo() != "Opcion Multiple") {
-                    cout << "Esta opcion solo esta disponible para items de tipo Opcion Multiple.\n";
-                } else {
-                    auto& preguntas = itemSeleccionado.getPreguntas();
-                    if (preguntas.empty()) {
-                        cout << "El item no tiene preguntas para modificar.\n";
-                    } else {
-                        cout << "Seleccione la pregunta que desea modificar:\n";
-                        for (size_t i = 0; i < preguntas.size(); ++i) {
-                            cout << i + 1 << ") " << preguntas[i].getEnunciado() << endl;
-                        }
-                        int indicePregunta = obtenerEntradaValida(1, preguntas.size()) - 1;
-                        ItemPregunta& preguntaSeleccionada = preguntas[indicePregunta];
-
-                        cout << "Ingrese nuevamente el enunciado de la pregunta: ";
-                        cin.ignore();
-                        string nuevoEnunciado;
-                        getline(cin, nuevoEnunciado);
-                        preguntaSeleccionada.setEnunciado(nuevoEnunciado);
-
-                        cout << "Cuantas respuestas desea ingresar? ";
-                        int numRespuestas = obtenerEntradaValida(1, 5);
-                        preguntaSeleccionada.getRespuestas().clear();
-                        for (int i = 0; i < numRespuestas; ++i) {
-                            cout << "Ingrese la respuesta #" << i + 1 << ": ";
-                            string nuevaRespuesta;
-                            getline(cin, nuevaRespuesta);
-                            preguntaSeleccionada.agregarRespuesta(nuevaRespuesta);
-                        }
-                        cout << "Pregunta modificada exitosamente.\n";
-                    }
-                }
-                break;
-            }
-        }
-        pausaMenu();
+   void actualizarItem() {
+    if (pruebas.empty()) {
+        cout << "No se han creado pruebas aun.\n";
+        return;
     }
+
+    cout << "Seleccione la prueba donde desea actualizar un item:\n";
+    for (size_t i = 0; i < pruebas.size(); ++i) {
+        cout << i + 1 << ") " << pruebas[i].getTitulo() << endl;
+    }
+
+    int indicePrueba = obtenerEntradaValida(1, pruebas.size()) - 1;
+    auto& pruebaSeleccionada = pruebas[indicePrueba];
+
+    const auto& items = pruebaSeleccionada.getItems();
+    if (items.empty()) {
+        cout << "La prueba seleccionada no tiene items.\n";
+        pausaMenu();
+        return;
+    }
+
+    cout << "Seleccione el item que desea actualizar:\n";
+    for (size_t i = 0; i < items.size(); ++i) {
+        cout << i + 1 << ") Item #" << i + 1 << " - Tipo: " << items[i].getTipo() << endl;
+    }
+
+    int indiceItem = obtenerEntradaValida(1, items.size()) - 1;
+    auto& itemSeleccionado = pruebaSeleccionada.getEditableItems()[indiceItem];
+
+    cout << "\nSeleccione una accion:\n";
+    cout << "1) Agregar Pregunta\n";
+    cout << "2) Salir\n";
+    int accion = obtenerEntradaValida(1, 2);
+
+    switch (accion) {
+        case 1: {
+            cout << "Ingrese el enunciado de la nueva pregunta: ";
+            cin.ignore();
+            string preguntaTexto;
+            getline(cin, preguntaTexto);
+
+            // Crear la nueva pregunta
+            ItemPregunta nuevaPregunta(preguntaTexto);
+
+            if (itemSeleccionado.getTipo() == "Verdadero/Falso") {
+                // Agregar automáticamente respuestas para Verdadero/Falso
+                nuevaPregunta.agregarRespuesta("Verdadero");
+                nuevaPregunta.agregarRespuesta("Falso");
+                cout << "Respuestas 'Verdadero' y 'Falso' añadidas automáticamente.\n";
+            } else if (itemSeleccionado.getTipo() == "Opción Múltiple") {
+                // Solicitar al usuario cuántas respuestas desea agregar
+                cout << "¿Cuántas respuestas desea agregar?: ";
+                int numRespuestas = obtenerEntradaValida(1, 10); // Límite de 10 respuestas (puede ajustarse según necesidad)
+
+                for (int i = 0; i < numRespuestas; ++i) {
+                    cout << "Ingrese la respuesta #" << i + 1 << ": ";
+                    string respuestaTexto;
+                    cin.ignore();  // Ignorar el salto de línea anterior
+                    getline(cin, respuestaTexto);
+                    nuevaPregunta.agregarRespuesta(respuestaTexto);
+                }
+            } else {
+                cout << "Tipo de item desconocido. No se pudo agregar la pregunta.\n";
+                break;
+            }
+
+            // Agregar la nueva pregunta al ítem
+            itemSeleccionado.agregarPregunta(nuevaPregunta);
+            cout << "Pregunta agregada exitosamente.\n";
+            break;
+        }
+        case 2:
+            cout << "Saliendo de la actualizacion...\n";
+            return;
+    }
+    pausaMenu();
+}
+
 
 public:
     void mostrarMenu() const {
@@ -248,25 +228,31 @@ public:
 
     void crearPrueba() {
         string tituloPrueba;
+        cout << "\n===== Crear Prueba =====\n";
         cout << "Ingrese el titulo de la prueba: ";
         cin.ignore();
         getline(cin, tituloPrueba);
         Prueba nuevaPrueba(tituloPrueba);
 
-        cout << "Ingrese la cantidad de Items de su prueba(max20)\n ";
-        int numItems = obtenerEntradaValida(1, 20);
-
-        for (int i = 0; i < numItems; ++i) {
-            cout << "\n===== Item #" << i + 1 << " =====\n";
-
+        while (true) {
+            cout << "\n === Nuevo Item ===\n";
             cout << "Seleccione que Tipo de Pregunta desea en el Item.\n";
             cout << "1) Verdadero/Falso\n";
             cout << "2) Opcion Multiple\n------------\n";
-            int tipoItem = obtenerEntradaValida(1, 2);
-            string tipo = (tipoItem == 1) ? "Verdadero/Falso" : "Opcion Multiple";
+            cout << "3) Salir\n";
+
+            int tipoItem = obtenerEntradaValida(1, 3);
+
+            if (tipoItem == 3) {
+                pruebas.push_back(nuevaPrueba);
+                cout << "Saliendo de la creación de la prueba...\n";
+                return;
+            }
+
+            string tipo = (tipoItem == 1) ? "Verdadero/Falso" : "Opción Múltiple";
 
             cout << "Ingrese la Taxonomia del item.\n";
-            cout << "1) crear\n2) Evaluar\n3) Analizar\n4) Aplicar\n5) Entender\n6) Recordar\n------------\n";
+            cout << "1) Crear\n2) Evaluar\n3) Analizar\n4) Aplicar\n5) Entender\n6) Recordar\n------------\n";
             int taxonomiaItem = obtenerEntradaValida(1, 6);
             string taxonomia;
             switch (taxonomiaItem) {
@@ -280,34 +266,46 @@ public:
 
             Item nuevoItem(tipo, taxonomia);
 
-            cout << "Cuantas preguntas contiene este item\n------------\n ";
-            int numPreguntas = obtenerEntradaValida(1, 5);
+            cout << "Ingrese la cantidad de preguntas que desea agregar al item: ";
+            int numPreguntas = obtenerEntradaValida(1, 50);
 
             for (int j = 0; j < numPreguntas; ++j) {
-                cout << "Ingrese la pregunta #" << j + 1 << "\n------------\n ";
-                string enunciado;
+                cout << "Ingrese la pregunta #" << j + 1 << ": ";
                 cin.ignore();
-                getline(cin, enunciado);
-                ItemPregunta nuevaPregunta(enunciado);
+                string enunciadoPregunta;
+                getline(cin, enunciadoPregunta);
 
-                if (tipo == "Opcion Multiple") {
-                    cout << "Cuantas respuestas tendra esta pregunta\n------------\n ";
+                ItemPregunta nuevaPregunta(enunciadoPregunta);
+
+                if (tipo == "Opción Múltiple") {
+                    cout << "Cuantas Respuestas quiere ingresar?: ";
                     int numRespuestas = obtenerEntradaValida(1, 4);
 
-                    for (int k = 0; k < numRespuestas; ++k) {
-                        cout << "Respuesta #" << k + 1 << ": ";
-                        string respuesta;
-                        getline(cin, respuesta);
-                        nuevaPregunta.agregarRespuesta(respuesta);
+                    for (int r = 0; r < numRespuestas; ++r) {
+                        cout << "Respuesta #" << r + 1 << ": ";
+                        cin.ignore();
+                        string respuestaTexto;
+                        getline(cin, respuestaTexto);
+                        nuevaPregunta.agregarRespuesta(respuestaTexto);
                     }
+                } else {
+                    nuevaPregunta.agregarRespuesta("Verdadero");
+                    nuevaPregunta.agregarRespuesta("Falso");
                 }
+
                 nuevoItem.agregarPregunta(nuevaPregunta);
             }
-            nuevaPrueba.agregarItem(nuevoItem);
-        }
 
-        pruebas.push_back(nuevaPrueba);
-        cout << "Prueba creada exitosamente.\n";
+            nuevaPrueba.agregarItem(nuevoItem);
+
+            cout << "Desea agregar otro item?\n1) Si\n2) No\n";
+            int continuar = obtenerEntradaValida(1, 2);
+            if (continuar == 2) {
+                pruebas.push_back(nuevaPrueba);
+                cout << "Prueba creada y guardada exitosamente.\n";
+                return;
+            }
+        }
     }
 
     void mostrarPruebas() const {
@@ -351,8 +349,8 @@ public:
 
             int indicePrueba = obtenerEntradaValida(1, pruebas.size()) - 1;
             auto& pruebaSeleccionada = pruebas[indicePrueba];
+            auto& items = pruebaSeleccionada.getEditableItems();
 
-            const auto& items = pruebaSeleccionada.getItems();
             if (items.empty()) {
                 cout << "La prueba seleccionada no tiene items.\n";
                 break;
@@ -367,12 +365,19 @@ public:
             int numeroItem = obtenerEntradaValida(1, items.size());
             cout << "Esta seguro que quiere eliminar este item?\n1) Si\n2) No\n";
             int confirmacion = obtenerEntradaValida(1, 2);
+
             if (confirmacion == 1) {
-                pruebaSeleccionada.getEditableItems().erase(pruebaSeleccionada.getEditableItems().begin() + (numeroItem - 1));
+                items.erase(items.begin() + (numeroItem - 1));
                 cout << "Item eliminado exitosamente.\n";
+
+                if (items.empty()) {
+                    cout << "La prueba \"" << pruebaSeleccionada.getTitulo() << "\" ya no tiene items. Se eliminara automaticamente.\n";
+                    pruebas.erase(pruebas.begin() + indicePrueba);
+                    break;
+                }
             } else {
                 cout << "Accion cancelada. El item no se eliminara.\n";
-                continue; // Repetimos la seleccion
+                continue;
             }
 
             cout << "¿Desea hacer algo mas?\n";
@@ -383,13 +388,12 @@ public:
 
             if (opcion == 1) continue;
             if (opcion == 2) return;
-            break; // Salimos al menu principal
+            break;
         }
         pausaMenu();
     }
 };
 
-// Main
 int main() {
     Menu menu;
     menu.lanzar();
